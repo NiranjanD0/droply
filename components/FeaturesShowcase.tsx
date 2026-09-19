@@ -13,10 +13,10 @@ const FeaturesShowcase = ({
     description,
 }: FeaturesShowcaseProps) => {
     return (
-        <div className="flex flex-col items-center h-40 w-30 border">
-            <Icon className="h-20 w-20 bg-green-200 text-black p-3 rounded-3xl" />
-            <p>{text}</p>
-            <p>{description}</p>
+        <div className="flex flex-col items-center w-35">
+            <Icon className="h-17 w-17 bg-green-200 text-black p-3 rounded-3xl mb-2 border-green-700 border-2" />
+            <p className="font-bold">{text}</p>
+            <p className="text-center text-[12px]">{description}</p>
         </div>
     );
 };
