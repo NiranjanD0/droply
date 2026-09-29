@@ -1,5 +1,5 @@
 "use client";
-import { SendIcon, LeafIcon, ShieldLockIcon, TriangleAlertIcon } from "lucide-react";
+import { SendIcon, LeafIcon, FileLockIcon, TriangleAlertIcon } from "lucide-react";
 import FeaturesShowcase from "./FeaturesShowcase";
 import RoomSettings from "./RoomSettings";
 import { Highlighter } from "./ui/highlighter";
@@ -56,7 +56,7 @@ const Hero = () => {
             />
 
             <FeaturesShowcase
-              icon={ShieldLockIcon}
+              icon={FileLockIcon}
               text="Private"
               description={
                 <>
@@ -107,11 +107,11 @@ const Hero = () => {
 
           </div>
         </div>
-        <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-6 md:px-8 border">
+        <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-6 md:px-8">
           <RoomSettings />
         </div>
       </div>
-      <div className="flex justify-between items-center px-10 mt-5 text-white relative z-10 border">
+      <div className="flex justify-between items-center px-10 mt-5 text-white relative z-10 border-t border-zinc-700/60 pt-5">
         <div className="flex gap-6 font-jetbrains-mono items-center">
           <p>Droply</p>
           <p>&copy;</p>
