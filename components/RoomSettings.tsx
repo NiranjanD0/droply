@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChevronRight,
   Eye,
   EyeOff,
   KeyRound,
@@ -8,9 +9,11 @@ import {
   LockKeyhole,
   LogIn,
   Plus,
+  Settings2,
   Tag,
   UserRound,
   UsersRound,
+  X,
 } from "lucide-react";
 import { FormEvent, useState } from "react";
 
@@ -20,6 +23,9 @@ const inputBase =
 
 const labelClass =
   "mb-1.5 block font-jetbrains-mono text-[11px] font-bold text-zinc-300";
+
+const selectBase =
+  "h-10 w-full rounded-md border border-zinc-700/60 bg-black/40 backdrop-blur-sm px-3 font-jetbrains-mono text-[12px] text-white outline-none focus:border-white focus:ring-1 focus:ring-white/20 appearance-none";
 
 /* ─── sub-components ──────────────────────────────────────────────────────── */
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -52,47 +58,58 @@ function Toggle({
   label,
   description,
   icon: Icon,
+  warning,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   label: string;
   description?: string;
   icon?: typeof LockKeyhole;
+  warning?: string;
 }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="flex w-full items-center gap-3 py-2 text-left"
-    >
-      {Icon && (
-        <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-zinc-400" />
-      )}
-      <span className="flex-1">
-        <span className="block font-jetbrains-mono text-[12px] font-bold text-white">
-          {label}
-        </span>
-        {description && (
-          <span className="block font-jetbrains-mono text-[10px] text-zinc-400">
-            {description}
-          </span>
-        )}
-      </span>
-      {/* toggle pill */}
-      <span
-        className={`relative h-[20px] w-9 shrink-0 rounded-full transition-colors duration-200 ${checked ? "bg-white" : "bg-zinc-800"
-          }`}
+    <div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className="flex w-full items-center gap-3 py-1.5 text-left"
       >
+        {Icon && (
+          <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-zinc-400" />
+        )}
+        <span className="flex-1">
+          <span className="block font-jetbrains-mono text-[12px] font-bold text-white">
+            {label}
+          </span>
+          {description && (
+            <span className="block font-jetbrains-mono text-[10px] text-zinc-500">
+              {description}
+            </span>
+          )}
+        </span>
+        {/* toggle pill */}
         <span
-          className={`absolute top-[2px] h-4 w-4 rounded-full shadow transition-transform duration-200 ${checked
-            ? "translate-x-[18px] bg-black"
-            : "translate-x-[2px] bg-zinc-400"
+          className={`relative h-[20px] w-9 shrink-0 rounded-full transition-colors duration-200 ${
+            checked ? "bg-white" : "bg-zinc-800"
+          }`}
+        >
+          <span
+            className={`absolute top-[2px] h-4 w-4 rounded-full shadow transition-transform duration-200 ${
+              checked
+                ? "translate-x-[18px] bg-black"
+                : "translate-x-[2px] bg-zinc-400"
             }`}
-        />
-      </span>
-    </button>
+          />
+        </span>
+      </button>
+      {warning && checked && (
+        <p className="mt-1 font-jetbrains-mono text-[10px] text-amber-400/80">
+          ⚠ {warning}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -118,7 +135,6 @@ function NumberStepper({
         onChange={(e) => onChange(Number(e.target.value))}
         className={`${inputBase} pl-10 pr-9 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
       />
-      {/* custom up/down arrows */}
       <div className="absolute right-0 flex h-full flex-col overflow-hidden rounded-r-md border-l border-zinc-700/60">
         <button
           type="button"
@@ -126,13 +142,7 @@ function NumberStepper({
           onClick={() => onChange(Math.min(max, value + 1))}
           className="flex flex-1 items-center justify-center px-2 text-zinc-400 hover:bg-white/10 hover:text-white"
         >
-          <svg
-            className="h-2 w-2"
-            viewBox="0 0 10 6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
+          <svg className="h-2 w-2" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth={2}>
             <path d="M1 5L5 1L9 5" />
           </svg>
         </button>
@@ -142,13 +152,7 @@ function NumberStepper({
           onClick={() => onChange(Math.max(min, value - 1))}
           className="flex flex-1 items-center justify-center border-t border-zinc-700/60 px-2 text-zinc-400 hover:bg-white/10 hover:text-white"
         >
-          <svg
-            className="h-2 w-2"
-            viewBox="0 0 10 6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
+          <svg className="h-2 w-2" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth={2}>
             <path d="M1 1L5 5L9 1" />
           </svg>
         </button>
@@ -168,6 +172,150 @@ function SubmitButton({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* ─── Advanced Settings Sidebar ───────────────────────────────────────────── */
+function AdvancedSidebar({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [whoCanJoin, setWhoCanJoin] = useState("anyone");
+  const [requireApproval, setRequireApproval] = useState(false);
+  const [lockRoom, setLockRoom] = useState(false);
+  const [linkBehavior, setLinkBehavior] = useState("open");
+  const [hideNames, setHideNames] = useState(false);
+  const [hideFileNames, setHideFileNames] = useState(false);
+  const [deleteOnLeave, setDeleteOnLeave] = useState(false);
+  const [enableChat, setEnableChat] = useState(true);
+
+  return (
+    <div
+      aria-hidden={!open}
+      className={`absolute inset-y-0 right-0 flex w-[280px] flex-col overflow-hidden border-l border-zinc-700/60 bg-zinc-900/60 backdrop-blur-md transition-transform duration-300 ease-in-out ${
+        open ? "translate-x-0" : "translate-x-full"
+      }`}
+    >
+      {/* sidebar header */}
+      <div className="flex shrink-0 items-center justify-between border-b border-zinc-700/60 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Settings2 className="h-4 w-4 text-zinc-400" />
+          <span className="font-jetbrains-mono text-[12px] font-bold text-white">
+            Advanced Settings
+          </span>
+        </div>
+        <button
+          type="button"
+          aria-label="Close advanced settings"
+          onClick={onClose}
+          className="rounded p-1 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-5">
+
+        {/* Who can join */}
+        <div>
+          <p className="mb-1 font-jetbrains-mono text-[11px] font-bold text-zinc-300">Who can join?</p>
+          <p className="mb-2 font-jetbrains-mono text-[10px] text-zinc-500">Choose who is allowed to join your room.</p>
+          <div className="relative">
+            <select
+              value={whoCanJoin}
+              onChange={(e) => setWhoCanJoin(e.target.value)}
+              className={selectBase}
+            >
+              <option value="anyone">Anyone with the link</option>
+              <option value="password">Password-protected</option>
+              <option value="invite">Invite-only</option>
+            </select>
+            <ChevronRight className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rotate-90 text-zinc-400" />
+          </div>
+        </div>
+
+        <div className="border-t border-zinc-800/70" />
+
+        {/* Require approval */}
+        <Toggle
+          checked={requireApproval}
+          onChange={setRequireApproval}
+          label="Require approval to join"
+          description="Approve participants before they can enter the room."
+        />
+
+        {/* Lock room */}
+        <Toggle
+          checked={lockRoom}
+          onChange={setLockRoom}
+          label="Lock room"
+          description="Prevent new participants from joining while locked."
+        />
+
+        {/* Room link behavior */}
+        <div>
+          <p className="mb-1 font-jetbrains-mono text-[11px] font-bold text-zinc-300">Room link behavior</p>
+          <p className="mb-2 font-jetbrains-mono text-[10px] text-zinc-500">Choose how your invitation link works.</p>
+          <div className="relative">
+            <select
+              value={linkBehavior}
+              onChange={(e) => setLinkBehavior(e.target.value)}
+              className={selectBase}
+            >
+              <option value="open">Anyone with the link can join</option>
+              <option value="lock-after-first">Lock after first participant</option>
+              <option value="regenerate">Allow host to regenerate link</option>
+            </select>
+            <ChevronRight className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rotate-90 text-zinc-400" />
+          </div>
+        </div>
+
+        <div className="border-t border-zinc-800/70" />
+
+        {/* Anonymity */}
+        <Toggle
+          checked={hideNames}
+          onChange={setHideNames}
+          label="Hide participant names"
+          description="Display anonymous labels instead of real names."
+        />
+
+        <Toggle
+          checked={hideFileNames}
+          onChange={setHideFileNames}
+          label="Hide file names"
+          description="Only sender and recipient see the file name."
+        />
+
+        <div className="border-t border-zinc-800/70" />
+
+        {/* Room Lifecycle */}
+        <p className="font-jetbrains-mono text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+          Room Lifecycle
+        </p>
+
+        <Toggle
+          checked={deleteOnLeave}
+          onChange={setDeleteOnLeave}
+          label="Delete room when host leaves"
+          description="Automatically close the room when its creator leaves."
+          warning="Leaving the room will end the session for all participants."
+        />
+
+        {/* Enable chat */}
+        <Toggle
+          checked={enableChat}
+          onChange={setEnableChat}
+          label="Enable chat"
+          description="Allow participants to send text messages in the room."
+        />
+
+      </div>
+    </div>
+  );
+}
+
 /* ─── main export ─────────────────────────────────────────────────────────── */
 export function RoomSettings() {
   /* join state */
@@ -181,13 +329,14 @@ export function RoomSettings() {
   const [createName, setCreateName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(2);
-  const [passwordProtected, setPasswordProtected] = useState(false);
-  const [createPassword, setCreatePassword] = useState("");
-  const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [createError, setCreateError] = useState("");
 
+  /* terms */
   const [joinTermsAccepted, setJoinTermsAccepted] = useState(false);
   const [createTermsAccepted, setCreateTermsAccepted] = useState(false);
+
+  /* advanced sidebar */
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const handleJoinSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -212,10 +361,6 @@ export function RoomSettings() {
       setCreateError("Please enter your name before continuing.");
       return;
     }
-    if (passwordProtected && createPassword.length < 4) {
-      setCreateError("Protected rooms need a password with at least 4 characters.");
-      return;
-    }
     if (!createTermsAccepted) {
       setCreateError("Please accept the Terms of Service before creating a room.");
       return;
@@ -225,17 +370,21 @@ export function RoomSettings() {
 
   return (
     /*
-     * Outer shell:
-     *   – black translucent theme with backdrop-blur
+     * Outer shell expands horizontally when sidebar opens.
+     * transition-[max-width] animates the width change.
      */
-    <div className="font-jetbrains-mono flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border-[3px] border-zinc-700/60 bg-zinc-950/40 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_16px_36px_rgba(0,0,0,0.8)]">
+    <div
+      className={`font-jetbrains-mono relative w-full overflow-hidden rounded-2xl border-[3px] border-zinc-700/60 bg-zinc-950/40 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_16px_36px_rgba(0,0,0,0.8)] transition-[max-width] duration-300 ease-in-out ${
+        advancedOpen ? "max-w-[calc(56rem+280px)]" : "max-w-4xl"
+      }`}
+    >
       {/* inner dark card */}
       <div className="flex flex-1 flex-col overflow-hidden rounded-[10px] border-2 border-zinc-800/70 bg-black/30 backdrop-blur-md">
 
         {/* two-panel body */}
-        <div className="grid flex-1 grid-cols-2 overflow-auto">
+        <div className="grid grid-cols-2">
 
-          {/* ── LEFT: Join ──────────────────────────────────────────── */}
+          {/* ── LEFT: Join ────────────────────────────────────────────── */}
           <form
             onSubmit={handleJoinSubmit}
             className="flex flex-col border-r-[2px] border-zinc-800/70 p-5"
@@ -288,11 +437,7 @@ export function RoomSettings() {
                     onClick={() => setShowJoinPassword(!showJoinPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
                   >
-                    {showJoinPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showJoinPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -316,20 +461,17 @@ export function RoomSettings() {
                 <LogIn className="h-4 w-4" /> Join Room
               </SubmitButton>
               {joinError && (
-                <p
-                  role="alert"
-                  className="mt-2.5 rounded border border-red-800/60 bg-red-950/60 p-2 font-jetbrains-mono text-[11px] font-bold text-red-300"
-                >
+                <p role="alert" className="mt-2.5 rounded border border-red-800/60 bg-red-950/60 p-2 font-jetbrains-mono text-[11px] font-bold text-red-300">
                   {joinError}
                 </p>
               )}
             </div>
           </form>
 
-          {/* ── RIGHT: Create ───────────────────────────────────────── */}
+          {/* ── RIGHT: Create ─────────────────────────────────────────── */}
           <form
             onSubmit={handleCreateSubmit}
-            className="flex flex-col p-5"
+            className="relative flex flex-col p-5"
           >
             <div className="mb-4">
               <h2 className="font-jetbrains-mono text-[18px] font-extrabold leading-snug text-white">
@@ -373,42 +515,25 @@ export function RoomSettings() {
                 />
               </div>
 
-              {/* password protection row — always shows input, disabled when toggle off */}
-              <div className="rounded-md border border-zinc-700/60 bg-black/30 backdrop-blur-sm px-3">
-                <Toggle
-                  checked={passwordProtected}
-                  onChange={setPasswordProtected}
-                  label="Password protection"
-                  description="Require a password to join."
-                  icon={LockKeyhole}
-                />
-                <div className="relative mb-2.5">
-                  <IconInput
-                    icon={KeyRound}
-                    type={showCreatePassword ? "text" : "password"}
-                    value={createPassword}
-                    onChange={(e) => setCreatePassword(e.target.value)}
-                    placeholder="Enter password..."
-                    className="pr-10"
-                    disabled={!passwordProtected}
-                  />
-                  <button
-                    type="button"
-                    aria-label={
-                      showCreatePassword ? "Hide password" : "Show password"
-                    }
-                    onClick={() => setShowCreatePassword(!showCreatePassword)}
-                    disabled={!passwordProtected}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white disabled:pointer-events-none disabled:opacity-40"
-                  >
-                    {showCreatePassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
+              {/* Advanced settings trigger row */}
+              <button
+                type="button"
+                aria-expanded={advancedOpen}
+                onClick={() => setAdvancedOpen((o) => !o)}
+                className="flex w-full items-center justify-between rounded-md border border-zinc-700/60 bg-white/[0.03] px-3 py-2.5 transition-colors hover:bg-white/[0.07]"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-zinc-400" />
+                  <span className="font-jetbrains-mono text-[11px] font-bold text-zinc-300">
+                    Advanced settings
+                  </span>
                 </div>
-              </div>
+                <ChevronRight
+                  className={`h-4 w-4 text-zinc-400 transition-transform duration-300 ${
+                    advancedOpen ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </button>
             </div>
 
             {/* submit area pushed to bottom */}
@@ -429,14 +554,16 @@ export function RoomSettings() {
                 <Plus className="h-4 w-4" /> Create Room
               </SubmitButton>
               {createError && (
-                <p
-                  role="alert"
-                  className="mt-2.5 rounded border border-red-800/60 bg-red-950/60 p-2 font-jetbrains-mono text-[11px] font-bold text-red-300"
-                >
+                <p role="alert" className="mt-2.5 rounded border border-red-800/60 bg-red-950/60 p-2 font-jetbrains-mono text-[11px] font-bold text-red-300">
                   {createError}
                 </p>
               )}
             </div>
+
+            {/* Advanced sidebar — positioned absolute on the right edge of this form,
+                overflows the card rightward; the outer container's max-width
+                transition reveals / hides it. */}
+            <AdvancedSidebar open={advancedOpen} onClose={() => setAdvancedOpen(false)} />
           </form>
 
         </div>
