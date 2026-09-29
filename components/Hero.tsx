@@ -1,6 +1,7 @@
 "use client";
-import { SendIcon, LeafIcon, ShieldLockIcon } from "lucide-react";
+import { SendIcon, LeafIcon, ShieldLockIcon, TriangleAlertIcon } from "lucide-react";
 import FeaturesShowcase from "./FeaturesShowcase";
+import RoomSettings from "./RoomSettings";
 import { Highlighter } from "./ui/highlighter";
 import { Floating3DParticles } from "./ui/floating-3d-particles";
 
@@ -86,20 +87,27 @@ const Hero = () => {
               transfers, not permanent file hosting, cloud storage, or file archives.
             </p>
 
-            <p>
-              <strong>What you share is your responsibility.</strong> Droply does not
-              review, approve, endorse, or guarantee user-provided content. You are solely
-              responsible for the files you choose to send and for ensuring that your use
-              of Droply complies with applicable laws and the rights of others.
-            </p>
+            <div className="flex gap-3 rounded-md border border-red-900/70 bg-red-950/40 p-3 text-xs leading-tight">
+              <TriangleAlertIcon
+                aria-hidden="true"
+                className="mt-0.5 h-5 w-5 shrink-0 text-red-200"
+              />
+              <p>
+                <strong className="block">What you share is your responsibility.</strong>{" "}
+                Droply does not review, approve, endorse, or guarantee user-provided
+                content. You are solely responsible for the files you choose to send and
+                for ensuring that your use of Droply complies with applicable laws and the
+                rights of others.
+              </p>
+            </div>
 
             <p>
               Droply provides the connection. What travels through it is up to you.
             </p>
           </div>
         </div>
-        <div>
-          {/* maincard */}
+        <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-6 md:px-8">
+          <RoomSettings />
         </div>
       </div>
       <div className="flex justify-between items-center px-10 mt-5 text-white relative z-10">
