@@ -107,7 +107,7 @@ const Hero = () => {
 
           </div>
         </div>
-        <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-6 md:px-8">
+        <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-6 md:px-8 border">
           <RoomSettings />
         </div>
       </div>
