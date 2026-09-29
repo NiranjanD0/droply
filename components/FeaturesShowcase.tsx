@@ -1,5 +1,5 @@
 "use client";
-import { LucideIcon, ShieldLockIcon, SendIcon } from "lucide-react";
+import { LucideIcon, FileLockIcon, SendIcon } from "lucide-react";
 
 interface FeaturesShowcaseProps {
     icon: LucideIcon;
