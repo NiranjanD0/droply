@@ -1,30 +1,27 @@
 "use client";
 
 import {
-  AlertCircle,
-  ChevronDown,
-  Clock3,
   Eye,
   EyeOff,
-  FileText,
-  Hash,
   KeyRound,
   Link2,
   LockKeyhole,
+  LogIn,
   Plus,
-  Settings2,
   Tag,
   UserRound,
   UsersRound,
 } from "lucide-react";
 import { FormEvent, useState } from "react";
 
-type Mode = "join" | "create";
+/* ─── shared style tokens ─────────────────────────────────────────────────── */
+const inputBase =
+  "h-10 w-full rounded-md border border-zinc-700/60 bg-black/40 backdrop-blur-sm px-3 font-jetbrains-mono text-[12px] text-white outline-none placeholder:text-zinc-500 focus:border-white focus:ring-1 focus:ring-white/20 disabled:opacity-40";
 
-const inputClass =
-  "h-8 w-full rounded-md border border-[#b9b9a7] bg-[#f5f1df] px-2 text-[11px] text-[#18332d] outline-none placeholder:text-[#7d8178] focus:border-[#236e5c] focus:ring-1 focus:ring-[#236e5c]/30";
-const labelClass = "mb-1 block text-[10px] font-bold text-[#243c36]";
+const labelClass =
+  "mb-1.5 block font-jetbrains-mono text-[11px] font-bold text-zinc-300";
 
+/* ─── sub-components ──────────────────────────────────────────────────────── */
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className={labelClass}>{children}</label>;
 }
@@ -37,8 +34,14 @@ function IconInput({
 }) {
   return (
     <div className="relative">
-      <Icon aria-hidden="true" className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#273d37]" />
-      <input {...props} className={`${inputClass} pl-8 ${props.className ?? ""}`} />
+      <Icon
+        aria-hidden="true"
+        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400"
+      />
+      <input
+        {...props}
+        className={`${inputBase} pl-10 ${props.className ?? ""}`}
+      />
     </div>
   );
 }
@@ -48,11 +51,13 @@ function Toggle({
   onChange,
   label,
   description,
+  icon: Icon,
 }: {
   checked: boolean;
-  onChange: (value: boolean) => void;
+  onChange: (v: boolean) => void;
   label: string;
   description?: string;
+  icon?: typeof LockKeyhole;
 }) {
   return (
     <button
@@ -60,202 +65,382 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-3 py-1 text-left"
+      className="flex w-full items-center gap-3 py-2 text-left"
     >
-      <span>
-        <span className="block text-[11px] font-bold text-[#243c36]">{label}</span>
-        {description && <span className="block text-[9px] text-[#667067]">{description}</span>}
+      {Icon && (
+        <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-zinc-400" />
+      )}
+      <span className="flex-1">
+        <span className="block font-jetbrains-mono text-[12px] font-bold text-white">
+          {label}
+        </span>
+        {description && (
+          <span className="block font-jetbrains-mono text-[10px] text-zinc-400">
+            {description}
+          </span>
+        )}
       </span>
-      <span className={`relative h-4 w-8 shrink-0 rounded-full transition-colors ${checked ? "bg-[#209b61]" : "bg-[#b8b9b0]"}`}>
-        <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-transform ${checked ? "translate-x-4" : "translate-x-0.5"}`} />
+      {/* toggle pill */}
+      <span
+        className={`relative h-[20px] w-9 shrink-0 rounded-full transition-colors duration-200 ${checked ? "bg-white" : "bg-zinc-800"
+          }`}
+      >
+        <span
+          className={`absolute top-[2px] h-4 w-4 rounded-full shadow transition-transform duration-200 ${checked
+            ? "translate-x-[18px] bg-black"
+            : "translate-x-[2px] bg-zinc-400"
+            }`}
+        />
       </span>
     </button>
   );
 }
 
-function SelectField({
-  icon: Icon,
-  children,
-  ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement> & {
-  icon: typeof Clock3;
+function NumberStepper({
+  value,
+  onChange,
+  min = 2,
+  max = 10,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
 }) {
   return (
-    <div className="relative">
-      <Icon aria-hidden="true" className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#273d37]" />
-      <select {...props} className={`${inputClass} appearance-none pl-8 pr-7 ${props.className ?? ""}`}>
-        {children}
-      </select>
-      <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#273d37]" />
+    <div className="relative flex items-center">
+      <UsersRound aria-hidden="true" className="absolute left-3 h-4 w-4 text-zinc-400" />
+      <input
+        type="number"
+        value={value}
+        min={min}
+        max={max}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className={`${inputBase} pl-10 pr-9 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+      />
+      {/* custom up/down arrows */}
+      <div className="absolute right-0 flex h-full flex-col overflow-hidden rounded-r-md border-l border-zinc-700/60">
+        <button
+          type="button"
+          aria-label="Increase"
+          onClick={() => onChange(Math.min(max, value + 1))}
+          className="flex flex-1 items-center justify-center px-2 text-zinc-400 hover:bg-white/10 hover:text-white"
+        >
+          <svg
+            className="h-2 w-2"
+            viewBox="0 0 10 6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path d="M1 5L5 1L9 5" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          aria-label="Decrease"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          className="flex flex-1 items-center justify-center border-t border-zinc-700/60 px-2 text-zinc-400 hover:bg-white/10 hover:text-white"
+        >
+          <svg
+            className="h-2 w-2"
+            viewBox="0 0 10 6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path d="M1 1L5 5L9 1" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
 
+function SubmitButton({ children }: { children: React.ReactNode }) {
+  return (
+    <button
+      type="submit"
+      className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-zinc-300 bg-white font-jetbrains-mono text-[14px] font-extrabold text-black shadow-[0_3px_0_#71717a] transition-all hover:-translate-y-px hover:bg-zinc-200 hover:shadow-[0_4px_0_#71717a] active:translate-y-px active:shadow-[0_1px_0_#71717a]"
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ─── main export ─────────────────────────────────────────────────────────── */
 export function RoomSettings() {
-  const [mode, setMode] = useState<Mode>("join");
-  const [name, setName] = useState("");
+  /* join state */
+  const [joinName, setJoinName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
-  const [roomName, setRoomName] = useState("");
-  const [createPassword, setCreatePassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordProtected, setPasswordProtected] = useState(false);
-  const [multipleFiles, setMultipleFiles] = useState(true);
-  const [advanced, setAdvanced] = useState(false);
-  const [error, setError] = useState("");
+  const [showJoinPassword, setShowJoinPassword] = useState(false);
+  const [joinError, setJoinError] = useState("");
 
-  const switchMode = (nextMode: Mode) => {
-    setMode(nextMode);
-    setError("");
+  /* create state */
+  const [createName, setCreateName] = useState("");
+  const [roomName, setRoomName] = useState("");
+  const [maxParticipants, setMaxParticipants] = useState(2);
+  const [passwordProtected, setPasswordProtected] = useState(false);
+  const [createPassword, setCreatePassword] = useState("");
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [createError, setCreateError] = useState("");
+
+  const [joinTermsAccepted, setJoinTermsAccepted] = useState(false);
+  const [createTermsAccepted, setCreateTermsAccepted] = useState(false);
+
+  const handleJoinSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!joinName.trim()) {
+      setJoinError("Please enter your name before continuing.");
+      return;
+    }
+    if (!roomCode.trim()) {
+      setJoinError("Enter a room code or invitation link.");
+      return;
+    }
+    if (!joinTermsAccepted) {
+      setJoinError("Please accept the Terms of Service before joining.");
+      return;
+    }
+    setJoinError("Room connections are not configured yet.");
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!name.trim()) {
-      setError("Please enter your name before continuing.");
+  const handleCreateSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!createName.trim()) {
+      setCreateError("Please enter your name before continuing.");
       return;
     }
-    if (mode === "join" && !roomCode.trim()) {
-      setError("Enter a room code or invitation link.");
+    if (passwordProtected && createPassword.length < 4) {
+      setCreateError("Protected rooms need a password with at least 4 characters.");
       return;
     }
-    if (mode === "create" && passwordProtected && createPassword.length < 4) {
-      setError("Protected rooms need a password with at least 4 characters.");
+    if (!createTermsAccepted) {
+      setCreateError("Please accept the Terms of Service before creating a room.");
       return;
     }
-    setError(
-      mode === "join"
-        ? "Room connections are not configured yet."
-        : "Room creation is not configured yet.",
-    );
+    setCreateError("Room creation is not configured yet.");
   };
 
   return (
-    <div className="w-full max-w-[650px] overflow-hidden rounded-xl border-[3px] border-[#15372f] bg-[#f3efdc] p-1.5 text-[#18332d] shadow-[0_8px_0_rgba(9,31,27,0.35)]">
-      <div className="rounded-lg border border-[#31574c] bg-[#193b34] p-1">
-        <div className="relative grid grid-cols-2 overflow-hidden rounded-md border border-[#0b2822] bg-[#18332d]">
-          <span
-            aria-hidden="true"
-            className={`absolute inset-y-0 w-1/2 rounded-md bg-[#f3efdc] shadow-[0_1px_3px_rgba(0,0,0,0.35)] transition-transform duration-300 ${mode === "create" ? "translate-x-full" : ""}`}
-          />
-          {(["join", "create"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => switchMode(tab)}
-              className={`relative z-10 h-8 text-xs font-bold transition-colors ${mode === tab ? "text-[#193b34]" : "text-[#f3efdc]"}`}
-            >
-              {tab === "join" ? "Join Room" : "Create Room"}
-            </button>
-          ))}
-        </div>
-      </div>
+    /*
+     * Outer shell:
+     *   – black translucent theme with backdrop-blur
+     */
+    <div className="font-jetbrains-mono flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border-[3px] border-zinc-700/60 bg-zinc-950/40 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_16px_36px_rgba(0,0,0,0.8)]">
+      {/* inner dark card */}
+      <div className="flex flex-1 flex-col overflow-hidden rounded-[10px] border-2 border-zinc-800/70 bg-black/30 backdrop-blur-md">
 
-      <form onSubmit={handleSubmit} className="p-4 md:p-5">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-base font-extrabold">{mode === "join" ? "Join an existing room" : "Create a new room"}</h2>
-            <p className="mt-0.5 text-[10px] text-[#687168]">
-              {mode === "join" ? "Enter the room code shared by the host." : "Configure your room and share the link with others."}
-            </p>
-          </div>
-          <Settings2 aria-hidden="true" className="h-5 w-5 text-[#31574c]" />
-        </div>
+        {/* two-panel body */}
+        <div className="grid flex-1 grid-cols-2 overflow-auto">
 
-        <div className="grid gap-4 md:grid-cols-2 md:gap-5">
-          <div className="space-y-3">
-            <div>
-              <FieldLabel>Your name</FieldLabel>
-              <IconInput icon={UserRound} value={name} maxLength={40} onChange={(event) => setName(event.target.value)} placeholder="e.g. Niranjan" />
+          {/* ── LEFT: Join ──────────────────────────────────────────── */}
+          <form
+            onSubmit={handleJoinSubmit}
+            className="flex flex-col border-r-[2px] border-zinc-800/70 p-5"
+          >
+            <div className="mb-4">
+              <h2 className="font-jetbrains-mono text-[18px] font-extrabold leading-snug text-white">
+                Join an existing room
+              </h2>
+              <p className="mt-1 font-jetbrains-mono text-[11px] text-zinc-400">
+                Enter the room code shared by the host.
+              </p>
             </div>
 
-            {mode === "join" ? (
-              <>
-                <div>
-                  <FieldLabel>Room code or link</FieldLabel>
-                  <IconInput icon={Link2} value={roomCode} onChange={(event) => setRoomCode(event.target.value)} placeholder="e.g. ABCD-1234 or droply.lol/xxxx" />
-                </div>
-                <div>
-                  <FieldLabel>Password (if required)</FieldLabel>
-                  <div className="relative">
-                    <IconInput icon={KeyRound} type={showPassword ? "text" : "password"} value={roomPassword} onChange={(event) => setRoomPassword(event.target.value)} placeholder="Enter password..." className="pr-8" />
-                    <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#32473f]">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <FieldLabel>Room name (optional)</FieldLabel>
-                  <IconInput icon={Tag} value={roomName} maxLength={60} onChange={(event) => setRoomName(event.target.value)} placeholder="e.g. Weekend Photos" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <FieldLabel>Room duration</FieldLabel>
-                    <SelectField icon={Clock3} defaultValue="10"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></SelectField>
-                  </div>
-                  <div>
-                    <FieldLabel>Max participants</FieldLabel>
-                    <SelectField icon={UsersRound} defaultValue="2"><option value="2">2 people</option><option value="3">3 people</option><option value="5">5 people</option><option value="10">10 people</option></SelectField>
-                  </div>
-                </div>
-                <div className="border-t border-[#d3d0bd] pt-2">
-                  <Toggle checked={passwordProtected} onChange={setPasswordProtected} label="Password protection" description="Require a password to join." />
-                  {passwordProtected && (
-                    <div className="mt-1">
-                      <IconInput icon={LockKeyhole} type={showPassword ? "text" : "password"} value={createPassword} onChange={(event) => setCreatePassword(event.target.value)} placeholder="Room password" />
-                    </div>
-                  )}
-                  <Toggle checked={multipleFiles} onChange={setMultipleFiles} label="Allow multiple files" description="Send more than one file per transfer." />
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="flex flex-col border-t border-[#d3d0bd] pt-4 md:border-l md:border-t-0 md:pl-5 md:pt-0">
-            {mode === "join" ? (
-              <div className="mt-auto">
-                <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#d78b79] bg-[#f2a38e] text-sm font-extrabold text-[#281f1b] shadow-[0_2px_0_#c97d6d] transition hover:bg-[#f6b09e]">
-                  <Link2 className="h-4 w-4" /> Join Room
-                </button>
-                <p className="mt-3 flex gap-2 text-[10px] leading-snug text-[#59655e]"><AlertCircle className="h-4 w-4 shrink-0" />Enter a room code or use a shared link to join an existing room.</p>
+            <div className="space-y-3.5">
+              <div>
+                <FieldLabel>Your name</FieldLabel>
+                <IconInput
+                  icon={UserRound}
+                  value={joinName}
+                  maxLength={40}
+                  onChange={(e) => setJoinName(e.target.value)}
+                  placeholder="e.g. Ghostly"
+                />
               </div>
-            ) : (
-              <>
-                <div className="mb-3">
-                  <FieldLabel>Transfer permissions</FieldLabel>
-                  <SelectField icon={UsersRound} defaultValue="all"><option value="all">Everyone can send & receive</option><option value="host-send">Host can send, participants receive</option><option value="host-receive">Host receives files only</option><option value="approval">Host approval required</option></SelectField>
+
+              <div>
+                <FieldLabel>Room code</FieldLabel>
+                <IconInput
+                  icon={Link2}
+                  value={roomCode}
+                  onChange={(e) => setRoomCode(e.target.value)}
+                  placeholder="e.g. 1234"
+                />
+              </div>
+
+              <div>
+                <FieldLabel>Password (if required)</FieldLabel>
+                <div className="relative">
+                  <IconInput
+                    icon={LockKeyhole}
+                    type={showJoinPassword ? "text" : "password"}
+                    value={roomPassword}
+                    onChange={(e) => setRoomPassword(e.target.value)}
+                    placeholder="Enter password..."
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    aria-label={showJoinPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowJoinPassword(!showJoinPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                  >
+                    {showJoinPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
-                <button type="button" onClick={() => setAdvanced(!advanced)} aria-expanded={advanced} className="flex items-center justify-between border-t border-[#d3d0bd] py-2 text-left">
-                  <span className="flex items-center gap-2"><Settings2 className="h-4 w-4" /><span><strong className="block text-[11px]">Advanced settings</strong><small className="text-[9px] text-[#667067]">File types, size limits, approvals and more.</small></span></span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${advanced ? "rotate-180" : ""}`} />
-                </button>
-                <div className={`grid transition-[grid-template-rows,opacity] duration-300 ${advanced ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-                  <div className="min-h-0 overflow-hidden">
-                    <div className="space-y-2 border-t border-[#d3d0bd] pb-2 pt-2">
-                      <SelectField icon={LockKeyhole} defaultValue="any"><option value="any">Anyone with the link</option><option value="password">Password-protected access</option><option value="invite">Invite-only access</option></SelectField>
-                      <Toggle checked={false} onChange={() => undefined} label="Require approval to join" />
-                      <Toggle checked={false} onChange={() => undefined} label="Lock room" description="Prevent new participants from joining." />
-                      <div className="grid grid-cols-2 gap-2">
-                        <SelectField icon={FileText} defaultValue="all"><option value="all">All file types</option><option value="docs">Documents only</option><option value="media">Images & videos</option><option value="custom">Custom extensions</option></SelectField>
-                        <SelectField icon={Hash} defaultValue="500"><option value="100">100 MB</option><option value="500">500 MB</option><option value="1024">1 GB</option><option value="5120">5 GB</option></SelectField>
-                      </div>
-                      <Toggle checked={false} onChange={() => undefined} label="Require recipient approval" />
-                      <Toggle checked={false} onChange={() => undefined} label="Hide participant names" />
-                    </div>
-                  </div>
+              </div>
+            </div>
+
+            {/* submit area pushed to bottom */}
+            <div className="mt-auto pt-5">
+              <label className="mb-3 flex cursor-pointer items-start gap-2 font-jetbrains-mono text-[10px] leading-snug text-zinc-400">
+                <input
+                  type="checkbox"
+                  checked={joinTermsAccepted}
+                  onChange={(e) => setJoinTermsAccepted(e.target.checked)}
+                  className="mt-px h-4 w-4 shrink-0 accent-white"
+                />
+                <span>
+                  I agree to Droply&apos;s Terms of Service and acknowledge that I
+                  am responsible for the files I share.
+                </span>
+              </label>
+              <SubmitButton>
+                <LogIn className="h-4 w-4" /> Join Room
+              </SubmitButton>
+              {joinError && (
+                <p
+                  role="alert"
+                  className="mt-2.5 rounded border border-red-800/60 bg-red-950/60 p-2 font-jetbrains-mono text-[11px] font-bold text-red-300"
+                >
+                  {joinError}
+                </p>
+              )}
+            </div>
+          </form>
+
+          {/* ── RIGHT: Create ───────────────────────────────────────── */}
+          <form
+            onSubmit={handleCreateSubmit}
+            className="flex flex-col p-5"
+          >
+            <div className="mb-4">
+              <h2 className="font-jetbrains-mono text-[18px] font-extrabold leading-snug text-white">
+                Create a new room
+              </h2>
+              <p className="mt-1 font-jetbrains-mono text-[11px] text-zinc-400">
+                Configure your room and share the link with others.
+              </p>
+            </div>
+
+            <div className="space-y-3.5">
+              <div>
+                <FieldLabel>Your name</FieldLabel>
+                <IconInput
+                  icon={UserRound}
+                  value={createName}
+                  maxLength={40}
+                  onChange={(e) => setCreateName(e.target.value)}
+                  placeholder="e.g. Ghostly"
+                />
+              </div>
+
+              <div>
+                <FieldLabel>Room name (optional)</FieldLabel>
+                <IconInput
+                  icon={Tag}
+                  value={roomName}
+                  maxLength={60}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  placeholder="e.g. Weekend Photos"
+                />
+              </div>
+
+              <div>
+                <FieldLabel>Max participants</FieldLabel>
+                <NumberStepper
+                  value={maxParticipants}
+                  onChange={setMaxParticipants}
+                  min={2}
+                  max={10}
+                />
+              </div>
+
+              {/* password protection row — always shows input, disabled when toggle off */}
+              <div className="rounded-md border border-zinc-700/60 bg-black/30 backdrop-blur-sm px-3">
+                <Toggle
+                  checked={passwordProtected}
+                  onChange={setPasswordProtected}
+                  label="Password protection"
+                  description="Require a password to join."
+                  icon={LockKeyhole}
+                />
+                <div className="relative mb-2.5">
+                  <IconInput
+                    icon={KeyRound}
+                    type={showCreatePassword ? "text" : "password"}
+                    value={createPassword}
+                    onChange={(e) => setCreatePassword(e.target.value)}
+                    placeholder="Enter password..."
+                    className="pr-10"
+                    disabled={!passwordProtected}
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showCreatePassword ? "Hide password" : "Show password"
+                    }
+                    onClick={() => setShowCreatePassword(!showCreatePassword)}
+                    disabled={!passwordProtected}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    {showCreatePassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
-                <button type="submit" className="mt-auto flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#d78b79] bg-[#f2a38e] text-sm font-extrabold text-[#281f1b] shadow-[0_2px_0_#c97d6d] transition hover:bg-[#f6b09e]">
-                  <Plus className="h-4 w-4" /> Create Room
-                </button>
-              </>
-            )}
-            {error && <p role="alert" className="mt-2 text-[10px] font-bold text-[#9b453c]">{error}</p>}
-          </div>
+              </div>
+            </div>
+
+            {/* submit area pushed to bottom */}
+            <div className="mt-auto pt-5">
+              <label className="mb-3 flex cursor-pointer items-start gap-2 font-jetbrains-mono text-[10px] leading-snug text-zinc-400">
+                <input
+                  type="checkbox"
+                  checked={createTermsAccepted}
+                  onChange={(e) => setCreateTermsAccepted(e.target.checked)}
+                  className="mt-px h-4 w-4 shrink-0 accent-white"
+                />
+                <span>
+                  I agree to Droply&apos;s Terms of Service and acknowledge that I
+                  am responsible for the files shared in this room.
+                </span>
+              </label>
+              <SubmitButton>
+                <Plus className="h-4 w-4" /> Create Room
+              </SubmitButton>
+              {createError && (
+                <p
+                  role="alert"
+                  className="mt-2.5 rounded border border-red-800/60 bg-red-950/60 p-2 font-jetbrains-mono text-[11px] font-bold text-red-300"
+                >
+                  {createError}
+                </p>
+              )}
+            </div>
+          </form>
+
         </div>
-      </form>
+      </div>
     </div>
   );
 }

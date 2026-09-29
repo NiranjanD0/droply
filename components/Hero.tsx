@@ -15,22 +15,22 @@ const Hero = () => {
         color="#ffffff"
         quantity={300}
       />
-      <div className="flex flex-col relative z-10">
+      <div className="flex flex-col relative z-10 md:pb-8 pb-3">
         {/* Top Bar */}
-        <div className="flex items-center gap-4 w-full md:h-50 h-20 md:ml-10 ml-3 pr-10 justify-between">
-          <Highlighter action="underline" color="#FFFFFF">
+        <Highlighter action="underline" color="#FFFFFF">
+          <div className="flex items-center gap-4 w-full md:h-30 h-20 md:ml-10 ml-3 pr-10 justify-between">
             <div className="flex items-center md:gap-3 gap-1 w-120 justify-center">
               <img src="/assets/images/TopBar/droply_ghost.png" alt="" className="md:w-30 md:h-30 w-15 h-15 object-contain" />
               <img src="/assets/images/TopBar/droply.webp" alt="" className="md:w-70 md:h-30 w-35 object-contain" />
             </div>
-          </Highlighter>
-          <div>
-            <img src="/assets/images/TopBar/punchline.png" alt="" className="md:w-50 md:h-20 w-20 h-10 object-contain md:mr-10 mr-3" />
+            <div>
+              <img src="/assets/images/TopBar/punchline.png" alt="" className="md:w-50 md:h-20 w-20 h-10 object-contain md:mr-10 mr-3" />
+            </div>
           </div>
-        </div>
+        </Highlighter>
       </div>
-      <div className="w-full h-full flex relative z-10 border">
-        <div className="flex flex-col gap-2 mx-10 w-120 border">
+      <div className="w-full h-full flex relative z-10">
+        <div className="flex flex-col gap-2 mx-10 w-120 my-5">
           <div className="flex items-start md:justify-between justify-center gap-2 text-white">
             <FeaturesShowcase
               icon={SendIcon}
@@ -87,6 +87,10 @@ const Hero = () => {
               transfers, not permanent file hosting, cloud storage, or file archives.
             </p>
 
+            <p>
+              Droply provides the connection. What travels through it is up to you.
+            </p>
+
             <div className="flex gap-3 rounded-md border border-red-900/70 bg-red-950/40 p-3 text-xs leading-tight">
               <TriangleAlertIcon
                 aria-hidden="true"
@@ -101,16 +105,13 @@ const Hero = () => {
               </p>
             </div>
 
-            <p>
-              Droply provides the connection. What travels through it is up to you.
-            </p>
           </div>
         </div>
         <div className="flex min-w-0 flex-1 items-center justify-center px-4 py-6 md:px-8">
           <RoomSettings />
         </div>
       </div>
-      <div className="flex justify-between items-center px-10 mt-5 text-white relative z-10">
+      <div className="flex justify-between items-center px-10 mt-5 text-white relative z-10 border">
         <div className="flex gap-6 font-jetbrains-mono items-center">
           <p>Droply</p>
           <p>&copy;</p>
